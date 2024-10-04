@@ -179,10 +179,8 @@ pub fn initialize_tracing_log(module_id: &str) -> eyre::Result<Option<WorkerGuar
         tracing_subscriber::registry().with(stdout_layer.and_then(file_layer)).init();
         Ok(Some(guard))
     } else {
-        let stdout_layer = tracing_subscriber::fmt::layer()
-            .with_target(false)
-            .with_writer(std::io::stdout)
-            .with_filter(stdout_filter);
+        let stdout_layer =
+            tracing_subscriber::fmt::layer().with_target(false).with_filter(stdout_filter);
         tracing_subscriber::registry().with(stdout_layer).init();
         Ok(None)
     }
