@@ -131,7 +131,7 @@ pub const fn default_u256() -> U256 {
 }
 
 // LOGGING
-pub fn initialize_tracing_log(module_id: &str) -> eyre::Result<WorkerGuard> {
+pub fn initialize_tracing_log(module_id: &str) -> eyre::Result<Option<WorkerGuard>> {
     let settings = LogsSettings::from_env_config()?;
 
     // Use file logs only if setting is set
@@ -177,19 +177,18 @@ pub fn initialize_tracing_log(module_id: &str) -> eyre::Result<WorkerGuard> {
             .with_filter(file_log_filter);
 
         tracing_subscriber::registry().with(stdout_layer.and_then(file_layer)).init();
-        Ok(guard)
+        Ok(Some(guard))
     } else {
-        let (writer, guard) = tracing_appender::non_blocking(std::io::stdout());
         let stdout_layer = tracing_subscriber::fmt::layer()
             .with_target(false)
-            .with_writer(writer)
+            .with_writer(std::io::stdout)
             .with_filter(stdout_filter);
         tracing_subscriber::registry().with(stdout_layer).init();
-        Ok(guard)
+        Ok(None)
     }
 }
 
-pub fn initialize_pbs_tracing_log() -> eyre::Result<WorkerGuard> {
+pub fn initialize_pbs_tracing_log() -> eyre::Result<Option<WorkerGuard>> {
     initialize_tracing_log(PBS_MODULE_NAME)
 }
 
